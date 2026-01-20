@@ -1,10 +1,11 @@
 import express from "express";
-import type { Request, Response } from "express";
+import indexRouter from "./routes/indexRoutes.ts";
+import cors from "cors";
 
 const app = express();
 
-app.get("/", (req: Request, res: Response) => {
-  res.json({ hello: "world" });
-});
+app.use(express.json());
+app.use(cors());
+app.use("/api", indexRouter);
 
 export default app;
