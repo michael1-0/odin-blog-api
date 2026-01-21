@@ -25,6 +25,7 @@ async function getPosts(req: Request, res: Response) {
   try {
     const posts = await prisma.post.findMany({
       select: {
+        id: true,
         title: true,
         content: true,
         published: true,
@@ -76,15 +77,15 @@ async function updatePost(req: Request, res: Response, next: NextFunction) {
     const id = Number(req.params.id);
     const updatedPost = await prisma.post.update({
       where: {
-        id: id
+        id: id,
       },
       data: {
         title: body.title,
         content: body.content,
-        published: body.published
-      }
-    })  
-    res.json({data: updatedPost})
+        published: body.published,
+      },
+    });
+    res.json({ data: updatedPost });
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
