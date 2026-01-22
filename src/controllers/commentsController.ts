@@ -1,13 +1,14 @@
 import type { Request, Response, NextFunction } from "express";
 import { Prisma } from "../db/generated/prisma/client.ts";
 import { prisma } from "../db/prisma.ts";
+import { matchedData, validationResult } from "express-validator";
 
 async function getComments(req: Request, res: Response, next: NextFunction) {
+  const postId = Number(req.query.postId);
+  if (!postId) {
+    return res.status(400).json({ error: "Query param postId invalid" });
+  }
   try {
-    const postId = Number(req.query.postId);
-    if (!postId) {
-      return res.status(400).json({ error: "Query param postId missing" });
-    }
     const comments = await prisma.comment.findMany({
       select: { id: true, username: true, content: true },
       where: { postId: postId },
@@ -19,12 +20,15 @@ async function getComments(req: Request, res: Response, next: NextFunction) {
 }
 
 async function getComment(req: Request, res: Response, next: NextFunction) {
+  const postId = Number(req.query.postId);
+  if (!postId) {
+    return res.status(400).json({ error: "Query param postId invalid" });
+  }
+  const id = Number(req.params.id);
+  if (!id) {
+    return res.status(400).json({ error: "Invalid parameter" });
+  }
   try {
-    const postId = Number(req.query.postId);
-    if (!postId) {
-      return res.status(400).json({ error: "Query param postId missing" });
-    }
-    const id = Number(req.params.id);
     const comment = await prisma.comment.findUnique({
       where: { id: id, postId: postId },
     });
@@ -35,18 +39,16 @@ async function getComment(req: Request, res: Response, next: NextFunction) {
 }
 
 async function postComment(req: Request, res: Response, next: NextFunction) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array() });
+  }
+  const body = matchedData(req);
+  const postId = Number(req.query.postId);
+  if (!postId) {
+    return res.status(400).json({ error: "Query param postId invalid" });
+  }
   try {
-    const body = req.body;
-    if (!body) {
-      return res.status(400).json({ error: "Body missing" });
-    }
-    const postId = Number(req.query.postId);
-    if (!body.content) {
-      return res.status(400).json({ error: "Content missing" });
-    }
-    if (!postId) {
-      return res.status(400).json({ error: "Query param postId missing" });
-    }
     const comment = await prisma.comment.create({
       data: {
         postId,
@@ -61,15 +63,16 @@ async function postComment(req: Request, res: Response, next: NextFunction) {
 }
 
 async function updateComment(req: Request, res: Response, next: NextFunction) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array() });
+  }
+  const body = matchedData(req);
+  const id = Number(req.params.id);
+  if (!id) {
+    return res.status(400).json({ error: "Invalid parameter" });
+  }
   try {
-    const body = req.body;
-    const id = Number(req.params.id);
-    if (!body) {
-      return res.status(400).json({ error: "Body missing" });
-    }
-    if (!body.content) {
-      return res.status(400).json({ error: "Content missing" });
-    }
     const updatedComment = await prisma.comment.update({
       where: { id },
       data: { content: body.content, username: body.username },
@@ -87,8 +90,11 @@ async function updateComment(req: Request, res: Response, next: NextFunction) {
 }
 
 async function deleteComment(req: Request, res: Response, next: NextFunction) {
+  const id = Number(req.params.id);
+  if (!id) {
+    return res.status(400).json({ error: "Invalid parameter" });
+  }
   try {
-    const id = Number(req.params.id);
     const deletedComment = await prisma.comment.delete({
       where: { id },
     });
