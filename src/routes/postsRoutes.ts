@@ -7,13 +7,14 @@ import {
   deletePost,
 } from "../controllers/postsController.ts";
 import { validatePost } from "../middlewares/validation.ts";
+import requireAuth from "../middlewares/auth.ts";
 
 const postRouter = Router();
 
 postRouter.get("/", getPosts);
 postRouter.get("/:id", getPost);
-postRouter.post("/", validatePost, postPost);
-postRouter.put("/:id", validatePost, updatePost);
-postRouter.delete("/:id", deletePost);
+postRouter.post("/", requireAuth, validatePost, postPost);
+postRouter.put("/:id", requireAuth, validatePost, updatePost);
+postRouter.delete("/:id", requireAuth, deletePost);
 
 export default postRouter;

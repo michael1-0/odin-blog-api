@@ -12,6 +12,7 @@ async function postPost(req: Request, res: Response) {
   try {
     const newPost = await prisma.post.create({
       data: {
+        userId: (req.user as any).id,
         title: body.title,
         content: body.content,
         published: body.published,
@@ -28,6 +29,7 @@ async function getPosts(req: Request, res: Response) {
     const posts = await prisma.post.findMany({
       select: {
         id: true,
+        userId: true,
         title: true,
         content: true,
         published: true,
@@ -65,6 +67,15 @@ async function deletePost(req: Request, res: Response, next: NextFunction) {
     return res.status(400).json({ error: "Invalid parameter" });
   }
   try {
+    const post = await prisma.post.findUnique({
+      where: {
+        userId: (req.user as any).id,
+        id: id,
+      },
+    });
+    if (!post) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
     const deletedPost = await prisma.post.delete({
       where: {
         id: id,
@@ -93,8 +104,17 @@ async function updatePost(req: Request, res: Response, next: NextFunction) {
     return res.status(400).json({ error: "Invalid parameter" });
   }
   try {
-    const updatedPost = await prisma.post.update({
+    const post = await prisma.post.findUnique({
       where: {
+        userId: (req.user as any).id,
+        id: id,
+      },
+    });
+    if (!post) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const updatedPost = await prisma.post.update({
+        where: {
         id: id,
       },
       data: {
