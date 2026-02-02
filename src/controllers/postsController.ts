@@ -70,15 +70,6 @@ async function deletePost(req: Request, res: Response, next: NextFunction) {
     return res.status(400).json({ error: "Invalid parameter" });
   }
   try {
-    const post = await prisma.post.findUnique({
-      where: {
-        userId: (req.user as any).id,
-        id: id,
-      },
-    });
-    if (!post) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
     const deletedPost = await prisma.post.delete({
       where: {
         id: id,
@@ -107,15 +98,6 @@ async function updatePost(req: Request, res: Response, next: NextFunction) {
     return res.status(400).json({ error: "Invalid parameter" });
   }
   try {
-    const post = await prisma.post.findUnique({
-      where: {
-        userId: (req.user as any).id,
-        id: id,
-      },
-    });
-    if (!post) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
     const updatedPost = await prisma.post.update({
       where: {
         id: id,
