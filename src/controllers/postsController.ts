@@ -34,6 +34,9 @@ async function getPosts(req: Request, res: Response) {
         content: true,
         published: true,
       },
+      orderBy: {
+        id: "asc",
+      },
     });
     res.json({ data: posts });
   } catch (error) {
@@ -114,7 +117,7 @@ async function updatePost(req: Request, res: Response, next: NextFunction) {
       return res.status(401).json({ error: "Unauthorized" });
     }
     const updatedPost = await prisma.post.update({
-        where: {
+      where: {
         id: id,
       },
       data: {
