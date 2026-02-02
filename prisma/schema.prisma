@@ -13,7 +13,7 @@ model Post {
   content   String?
   published Boolean   @default(false)
   comments  Comment[]
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
 
   @@map("posts")
@@ -25,7 +25,7 @@ model Comment {
   username String?
 
   postId Int
-  post   Post @relation(fields: [postId], references: [id])
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@map("comments")
 }
