@@ -75,6 +75,11 @@ const validateSignup = [
     .withMessage("Please confirm your password")
     .custom((value, { req }) => value === req.body.password)
     .withMessage("Passwords do not match"),
+  body("secret")
+    .notEmpty()
+    .withMessage("Secret is required")
+    .custom((value) => value === process.env.ADMIN_SECRET)
+    .withMessage("Secrets do not match"),
 ];
 
 const validateLogin = [
